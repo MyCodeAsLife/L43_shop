@@ -36,7 +36,7 @@ namespace L43_shop
                     switch (numberMenu)
                     {
                         case CommandVendorShowProducts:
-                            vendor.ShowProducts();
+                            vendor.ShowAllProducts();
                             break;
 
                         case CommandByProduct:
@@ -81,154 +81,132 @@ namespace L43_shop
         {
             Console.WriteLine("Вы ввели неизвестное значение.");
         }
+    }
 
-        class Player
+    class Player
+    {
+        private int _currentMass;
+        private int _massLimit;
+
+        private List<Product> _bag = new List<Product>();
+
+        public Player(int money, int massLimit)
         {
-            private int _currentMass;
-            private int _massLimit;
+            Money = money;
+            _currentMass = 0;
+            _massLimit = massLimit;
+        }
 
-            private List<Product> _bag = new List<Product>();
+        public int Money { get; private set; }
 
-            public Player(int money, int massLimit)
+        public void BuyProduct(Vendor vendor)
+        {
+            Console.WriteLine("Введите наименование продукта: ");
+            string nameProduct = Console.ReadLine();
+
+            if (vendor.TryGetProductInfo(nameProduct, out Product product))
             {
-                this.Money = money;
-                _currentMass = 0;
-                _massLimit = massLimit;
-            }
-
-            public int Money { get; private set; }
-
-            public void BuyProduct(Vendor vendor)
-            {
-                Console.WriteLine("Введите наименование продукта: ");
-                string nameProduct = Console.ReadLine();
-
-                Product product = vendor.GetProductInfo(nameProduct);
-
-                if (product != null)
+                if ((product.Mass + _currentMass) <= _massLimit)
                 {
-                    if ((product.Mass + _currentMass) <= _massLimit)
+                    if (Money >= product.Price)
                     {
-                        if (Money >= product.Price)
-                        {
-                            vendor.SellProduct(product);
-                            Money -= product.Price;
-                            _currentMass += product.Mass;
-                            _bag.Add(product);
-                        }
-                        else
-                        {
-                            Console.WriteLine("У вас недостаточно денег для покупки.");
-                        }
+                        vendor.SellProduct(product);
+                        Money -= product.Price;
+                        _currentMass += product.Mass;
+                        _bag.Add(product);
                     }
                     else
                     {
-                        Console.WriteLine("Вам не хватает сил нести больше вещей.");
+                        Console.WriteLine("У вас недостаточно денег для покупки.");
                     }
                 }
                 else
                 {
-                    Console.WriteLine("У продавца нет такого товара.");
+                    Console.WriteLine("Вам не хватает сил нести больше вещей.");
                 }
             }
-
-            public void ShowInventory()
+            else
             {
-                Console.WriteLine($"Общий вес предметов: {_currentMass}. Максимум сколько вы можете поднять: {_massLimit}");
-
-                if (_bag.Count > 0)
-                    foreach (var item in _bag)
-                        Console.WriteLine($"Наименовкание: {item.Name}\t Вес:{item.Mass}");
-                else
-                    Console.WriteLine("У вас нет предметов в инвентаре.");
+                Console.WriteLine("У продавца нет такого товара.");
             }
         }
 
-        class Vendor
+        public void ShowInventory()
         {
-            private int _money;
-            private List<Product> _storage = new List<Product>();
+            Console.WriteLine($"Общий вес предметов: {_currentMass}. Максимум сколько вы можете поднять: {_massLimit}");
 
-            public Vendor()
-            {
-                _money = 0;
-            }
-
-            public void AddProduct(Product product)
-            {
-                _storage.Add(product);
-            }
-
-            public void SellProduct(Product product)
-            {
-                _money += product.Price;
-                _storage.Remove(product);
-            }
-
-            public void ShowProducts()
-            {
-                foreach (var item in _storage)
-                    Console.WriteLine($"Наименование: {item.Name}\tВесс: {item.Mass}\tЦена: {item.Price}");
-            }
-
-            public Product GetProductInfo(string nameProduct)
-            {
-                int indexProduct = SearchProduct(nameProduct);
-
-                if (indexProduct >= 0)
-                    return _storage[indexProduct];
-
-                return null;
-            }
-
-            private int SearchProduct(string nameProduct)
-            {
-                for (int i = 0; i < _storage.Count; i++)
-                {
-                    if (_storage[i].Name == nameProduct)
-                        return i;
-                }
-
-                return -1;
-            }
+            if (_bag.Count > 0)
+                foreach (Product item in _bag)
+                    Console.WriteLine($"Наименовкание: {item.Name}\t Вес:{item.Mass}");
+            else
+                Console.WriteLine("У вас нет предметов в инвентаре.");
         }
+    }
 
-        class Product
+    class Vendor
+    {
+        private int _money;
+        private List<Product> _storage = new List<Product>();
+
+        public Vendor()
         {
-            private string _name;
-            private int _mass;
-            private int _price;
-
-            public Product(string name, int mass, int price)
-            {
-                _name = name;
-                _mass = mass;
-                _price = price;
-            }
-
-            public string Name
-            {
-                get
-                {
-                    return _name;
-                }
-            }
-
-            public int Mass
-            {
-                get
-                {
-                    return _mass;
-                }
-            }
-
-            public int Price
-            {
-                get
-                {
-                    return _price;
-                }
-            }
+            _money = 0;
         }
+
+        public void AddProduct(Product product)
+        {
+            _storage.Add(product);
+        }
+
+        public void SellProduct(Product product)
+        {
+            _money += product.Price;
+            _storage.Remove(product);
+        }
+
+        public void ShowAllProducts()
+        {
+            foreach (Product item in _storage)
+                Console.WriteLine($"Наименование: {item.Name}\tВесс: {item.Mass}\tЦена: {item.Price}");
+        }
+
+        public bool TryGetProductInfo(string nameProduct, out Product product)
+        {
+            product = null;
+            int indexProduct = GetIndexProduct(nameProduct);
+
+            if (indexProduct >= 0)
+            {
+                product = _storage[indexProduct];
+                return true;
+            }
+
+            return false;
+        }
+
+        private int GetIndexProduct(string nameProduct)
+        {
+            for (int i = 0; i < _storage.Count; i++)
+                if (_storage[i].Name == nameProduct)
+                    return i;
+
+            return -1;
+        }
+    }
+
+    class Product
+    {
+        public Product(string name, int mass, int price)
+        {
+            Name = name;
+            Mass = mass;
+            Price = price;
+        }
+
+        public string Name { get; private set; }
+
+        public int Mass { get; private set; }
+
+        public int Price { get; private set; }
     }
 }
