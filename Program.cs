@@ -17,7 +17,7 @@ namespace L43_shop
 
             bool isOpen = true;
 
-            ReceiveGoods(vendor);
+            vendor.ReceiveGoods();
 
             while (isOpen)
             {
@@ -52,32 +52,25 @@ namespace L43_shop
                             continue;
 
                         default:
-                            ShowError();
+                            Error.Show();
                             break;
                     }
                 }
                 else
                 {
                     Console.Clear();
-                    ShowError();
+                    Error.Show();
                 }
 
                 Console.WriteLine("\nДля возвращение в меню, нажмите любую кнопку.");
                 Console.ReadKey(true);
             }
         }
+    }
 
-        static void ReceiveGoods(Vendor vendor)
-        {
-            vendor.AddProduct(new Product("Меч", 5, 30));
-            vendor.AddProduct(new Product("Лук", 3, 35));
-            vendor.AddProduct(new Product("Посох", 2, 55));
-            vendor.AddProduct(new Product("Щит", 8, 40));
-            vendor.AddProduct(new Product("Доспех", 15, 55));
-            vendor.AddProduct(new Product("Зелье лечения", 1, 10));
-        }
-
-        static void ShowError()
+    class Error
+    {
+        public static void Show()
         {
             Console.WriteLine("Вы ввели неизвестное значение.");
         }
@@ -182,6 +175,16 @@ namespace L43_shop
             }
 
             return false;
+        }
+
+        public void ReceiveGoods()
+        {
+            AddProduct(new Product("Меч", 5, 30));
+            AddProduct(new Product("Лук", 3, 35));
+            AddProduct(new Product("Посох", 2, 55));
+            AddProduct(new Product("Щит", 8, 40));
+            AddProduct(new Product("Доспех", 15, 55));
+            AddProduct(new Product("Зелье лечения", 1, 10));
         }
 
         private int GetIndexProduct(string nameProduct)
