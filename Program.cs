@@ -99,9 +99,9 @@ namespace L43_shop
 
             if (_vendor.TryGetProductId(nameProduct, out int productId))
             {
-                if ((_vendor.GetMassProduct(productId) + player.CurrentMass) <= player.MassLimit)
+                if ((_vendor.GetProductMass(productId) + player.CurrentMass) <= player.MassLimit)
                 {
-                    if (player.Money >= _vendor.GetPryceProduct(productId))
+                    if (player.Money >= _vendor.GetProductPrice(productId))
                         player.BuyProduct(_vendor.SellProduct(productId));
                     else
                         Console.WriteLine("У вас недостаточно денег для покупки.");
@@ -181,12 +181,12 @@ namespace L43_shop
                 Console.WriteLine($"Наименование: {item.Value.Name}\tВесс: {item.Value.Mass}\tЦена: {item.Value.Price}");
         }
 
-        public int GetPryceProduct(int productId)
+        public int GetProductPrice(int productId)
         {
             return _storage[productId].Price;
         }
 
-        public int GetMassProduct(int productId)
+        public int GetProductMass(int productId)
         {
             return _storage[productId].Mass;
         }
