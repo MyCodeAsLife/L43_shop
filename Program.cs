@@ -30,7 +30,7 @@ namespace L43_shop
     class Shop
     {
         private const int CommandVendorShowProducts = 1;
-        private const int CommandPlayerByProduct = 2;
+        private const int CommandTrade = 2;
         private const int CommandPlayerShowInventory = 3;
         private const int CommandExit = 4;
 
@@ -50,8 +50,8 @@ namespace L43_shop
             {
                 Console.Clear();
                 Console.WriteLine($"Добропожаловать в магазин!\n{CommandVendorShowProducts} - Посмотреть товары продовца.\n" +
-                                  $"{CommandPlayerByProduct} - Купить товар.\n{CommandPlayerShowInventory} - Посмотреть " +
-                                  $"свой инвентарь.\n{CommandExit} - Выйти из магазина.\n");
+                                  $"{CommandTrade} - Купить товар.\n{CommandPlayerShowInventory} - Посмотреть свой " +
+                                  $"инвентарь.\n{CommandExit} - Выйти из магазина.\n");
                 Console.Write("Выбирете действие: ");
 
                 if (int.TryParse(Console.ReadLine(), out int numberMenu))
@@ -64,7 +64,7 @@ namespace L43_shop
                             _vendor.ShowInventory();
                             break;
 
-                        case CommandPlayerByProduct:
+                        case CommandTrade:
                             Trade(player);
                             break;
 
