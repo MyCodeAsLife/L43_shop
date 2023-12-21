@@ -34,7 +34,7 @@ namespace L43_shop
         private const int CommandPlayerShowInventory = 3;
         private const int CommandExit = 4;
 
-        Vendor _vendor;
+        private Vendor _vendor;
 
         public Shop()
         {
@@ -65,7 +65,7 @@ namespace L43_shop
                             break;
 
                         case CommandPlayerByProduct:
-                            SellGoods(player);
+                            Trade(player);
                             break;
 
                         case CommandPlayerShowInventory:
@@ -92,7 +92,7 @@ namespace L43_shop
             }
         }
 
-        private void SellGoods(Player player)
+        private void Trade(Player player)
         {
             Console.WriteLine("Введите наименование продукта: ");
             string nameProduct = Console.ReadLine();
@@ -102,8 +102,21 @@ namespace L43_shop
                 int productMass = _vendor.GetProductMass(productIndex);
                 int productPrice = _vendor.GetProductPrice(productIndex);
 
-                if (player.IsPossibleBuy(productMass, productPrice))
-                    player.BuyProduct(_vendor.SellProduct(productIndex));
+                if (player.IsEnoughWeightCapacity(productMass))
+                {
+                    if (player.IsEnoughMoney(productPrice))
+                    {
+                        player.BuyProduct(_vendor.SellProduct(productIndex));
+                    }
+                    else
+                    {
+                        Console.WriteLine("У вас недостаточно денег для покупки.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Вам не хватает сил нести больше вещей.");
+                }
             }
             else
             {
@@ -114,17 +127,17 @@ namespace L43_shop
 
     class Character
     {
-        protected List<Product> _inventory = new List<Product>();
-        protected int _money;
+        protected List<Product> Inventory = new List<Product>();
+        protected int Money;
 
         public Character(int money)
         {
-            _money = money;
+            Money = money;
         }
 
         public virtual void ShowInventory()
         {
-            foreach (var item in _inventory)
+            foreach (var item in Inventory)
                 Console.WriteLine($"Наименование: {item.Name}\tВесс: {item.Mass}");
         }
     }
@@ -140,36 +153,29 @@ namespace L43_shop
             _massLimit = massLimit;
         }
 
-        public bool IsPossibleBuy(int productMass, int productPrice)
+        public bool IsEnoughMoney(int needMoney)
         {
-            if ((_currentMass + productMass) <= _massLimit)
-            {
-                if (productPrice <= _money)
-                    return true;
-                else
-                    Console.WriteLine("У вас недостаточно денег для покупки.");
-            }
-            else
-            {
-                Console.WriteLine("Вам не хватает сил нести больше вещей.");
-            }
+            return (Money >= needMoney);
+        }
 
-            return false;
+        public bool IsEnoughWeightCapacity(int objectWeight)
+        {
+            return (_massLimit >= (_currentMass + objectWeight));
         }
 
         public void BuyProduct(Product product)
         {
-            _money -= product.Price;
+            Money -= product.Price;
             _currentMass += product.Mass;
-            _inventory.Add(product);
+            Inventory.Add(product);
         }
 
         public override void ShowInventory()
         {
-            Console.WriteLine($"У вас в наличии: {_money} монет.");
+            Console.WriteLine($"У вас в наличии: {Money} монет.");
             Console.WriteLine($"Общий вес предметов: {_currentMass}. Максимум сколько вы можете поднять: {_massLimit}\n");
 
-            if (_inventory.Count > 0)
+            if (Inventory.Count > 0)
                 base.ShowInventory();
             else
                 Console.WriteLine("У вас нет предметов в инвентаре.");
@@ -182,34 +188,34 @@ namespace L43_shop
 
         public Product SellProduct(int productIndex)
         {
-            Product soldProduct = _inventory[productIndex];
-            _inventory.RemoveAt(productIndex);
-            _money += soldProduct.Price;
+            Product soldProduct = Inventory[productIndex];
+            Inventory.RemoveAt(productIndex);
+            Money += soldProduct.Price;
 
             return soldProduct;
         }
 
         public override void ShowInventory()
         {
-            foreach (var item in _inventory)
+            foreach (var item in Inventory)
                 Console.WriteLine($"Наименование: {item.Name}\tВесс: {item.Mass}\tЦена: {item.Price}");
         }
 
         public int GetProductPrice(int productIndex)
         {
-            return _inventory[productIndex].Price;
+            return Inventory[productIndex].Price;
         }
 
         public int GetProductMass(int productId)
         {
-            return _inventory[productId].Mass;
+            return Inventory[productId].Mass;
         }
 
         public bool TryGetProductIndex(string nameProduct, out int productIndex)
         {
-            for (int i = 0; i < _inventory.Count; i++)
+            for (int i = 0; i < Inventory.Count; i++)
             {
-                if (_inventory[i].Name == nameProduct)
+                if (Inventory[i].Name == nameProduct)
                 {
                     productIndex = i;
                     return true;
@@ -222,12 +228,12 @@ namespace L43_shop
 
         public void FillInventory()
         {
-            _inventory.Add(new Product("Меч", 5, 30));
-            _inventory.Add(new Product("Лук", 3, 35));
-            _inventory.Add(new Product("Посох", 2, 55));
-            _inventory.Add(new Product("Щит", 8, 40));
-            _inventory.Add(new Product("Доспех", 15, 55));
-            _inventory.Add(new Product("Зелье лечения", 1, 10));
+            Inventory.Add(new Product("Меч", 5, 30));
+            Inventory.Add(new Product("Лук", 3, 35));
+            Inventory.Add(new Product("Посох", 2, 55));
+            Inventory.Add(new Product("Щит", 8, 40));
+            Inventory.Add(new Product("Доспех", 15, 55));
+            Inventory.Add(new Product("Зелье лечения", 1, 10));
         }
     }
 
